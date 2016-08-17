@@ -1,12 +1,12 @@
 # api.py
-'''Defines a YouDao class for accessing the public
+'''Defines a YouDaoAPI class for accessing the public
 youdao.com api.
 
 
 Instantiating With API Key
 ==========================
 
->>> youdao = YouDao(keyfrom, key)
+>>> youdao = YouDaoAPI(keyfrom, key)
 
 
 Instantiating With Config File
@@ -21,7 +21,7 @@ and key that youdao provided:
 keyfrom = <keyfrom>
 key = <key>
 
->>> youdao = YouDao.from_config('keys.ini')
+>>> youdao = YouDaoAPI.from_config('keys.ini')
 
 
 Making Queries
@@ -45,7 +45,26 @@ import requests
 import configparser
 
 
-class YouDao(object):
+
+'''
+
+..TODO: Implement YouDaoWord and YouDaoSentence.
+
+'''
+
+class YouDaoWord(object):
+
+    def __init__(self, word, definitions, pinyin):
+        self.word = word
+        self.definitions = definitions
+        self.pinyin = pinyin
+
+
+class YouDaoSentence(object):
+    pass
+
+
+class YouDaoAPI(object):
     '''
 
     ..TODO:  Detect when the translation doesn't actually exist.
@@ -74,10 +93,11 @@ class YouDao(object):
         key = config['DEFAULT']['key']
         return cls(keyfrom, key)
 
-
-    def get(self, query):
-        '''Returns a dictionary with the word, definitions, and pinyin.'''
-        json = self.get_json(query)
+    def get_word(self, word):
+        json = self.get_json(word)
+        if 'basic' not in json:
+            raise Exception('This request did not return basic definitions.  '
+                            'Perhaps it was not a single word?')
         definitions = json['basic']['explains']
         pinyin = json['basic']['phonetic']
         word = json['query']
@@ -113,24 +133,17 @@ class YouDao(object):
 
 
 
-def test_url():
-    with open('keys', 'r') as f:
-        key = f.readline().strip()
-        keyfrom = f.readline().strip()
+def test():
+    words = [ '悲壮', '说了什么来着','我不知道。我应该说什么呢？']
+    youdao = YouDaoAPI.from_config('keys.ini')
+    jsons = []
+    for w in words:
+        j = youdao.get_word(w)
+        jsons.append(j)
 
-    return URL(keyfrom, key, '悲壮')
-
+    return jsons
 
 
 
 if __name__ == '__main__':
-    import os
-    import json
-    key = None
-    keyfrom = None
-
-    config = configparser.ConfigParser()
-    config.read('keys.ini')
-    print(config['DEFAULT']['key'])
-    print(config['DEFAULT']['keyfrom'])
-
+    test()
