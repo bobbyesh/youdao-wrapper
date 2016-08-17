@@ -36,8 +36,6 @@ After instantiating with one of the above methods:
 >>> query
 {'word': '你好', 'pinyin': 'nǐ hǎo', 'def': ['hello；hi']}
 
-
-
 '''
 
 
@@ -48,6 +46,20 @@ import configparser
 
 
 class YouDao(object):
+    '''
+
+    ..TODO:  Detect when the translation doesn't actually exist.
+
+    '''
+
+    error_messages = {
+        0: 'Normal',
+        20: 'The request string was too long',
+        30: 'Unable to efficiently translate',
+        40: 'Unsupported language type',
+        50: 'Invalid key',
+        60: 'No dictionary results',
+    }
 
     def __init__(self, keyfrom, key):
         self.keyfrom = keyfrom
@@ -91,6 +103,13 @@ class YouDao(object):
     def url(self, query, doctype='json'):
         return ('http://fanyi.youdao.com/openapi.do?keyfrom=%s&key=%s'
                 '&type=data&doctype=%s&version=1.1&q=') % (self.keyfrom, self.key, doctype) + quote(query)
+
+    def handle_error(self, json):
+        code = json['error_code']
+        if code != 0:
+            raise Exception( self.error_messages[code] )
+
+
 
 
 
