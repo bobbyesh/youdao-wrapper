@@ -1,7 +1,50 @@
 # api.py
+'''Defines a YouDao class for accessing the public
+youdao.com api.
+
+
+Instantiating With API Key
+==========================
+
+>>> youdao = YouDao(keyfrom, key)
+
+
+Instantiating With Config File
+==============================
+
+Create a keys.ini in the following format,
+replace <keyfrom> and <key> with the keyfrom
+and key that youdao provided:
+
+# keys.ini
+[DEFAULT]
+keyfrom = <keyfrom>
+key = <key>
+
+>>> youdao = YouDao.from_config('keys.ini')
+
+
+Making Queries
+==============
+
+The `get` method returns a dictionary with the
+word, its definitions, and the pinyin.
+
+After instantiating with one of the above methods:
+
+>>> query = youdao.get('你好')
+>>> query
+{'word': '你好', 'pinyin': 'nǐ hǎo', 'def': ['hello；hi']}
+
+
+
+'''
+
+
 
 from urllib.parse import quote
 import requests
+import configparser
 
 
 class YouDao(object):
@@ -10,6 +53,15 @@ class YouDao(object):
         self.keyfrom = keyfrom
         self. key = key
         self.response = None
+
+    @classmethod
+    def from_config(cls, config_file):
+        config = configparser.ConfigParser()
+        config.read(config_file)
+        keyfrom = config['DEFAULT']['keyfrom']
+        key = config['DEFAULT']['key']
+        return cls(keyfrom, key)
+
 
     def get(self, query):
         '''Returns a dictionary with the word, definitions, and pinyin.'''
@@ -24,7 +76,7 @@ class YouDao(object):
     def get_json(self, query):
         url = self.url(query)
         self.response= requests.get(url)
-        return response.json()
+        return self.response.json()
 
     def get_jsonp(self, query):
         url = self.url(query, doctype='jsonp')
@@ -54,14 +106,12 @@ def test_url():
 
 if __name__ == '__main__':
     import os
+    import json
     key = None
     keyfrom = None
-    with open('keys', 'r') as f:
-        key = f.readline().strip()
-        keyfrom = f.readline().strip()
 
-    youdao = YouDao(keyfrom, key)
-    query = '悲壮'
+    config = configparser.ConfigParser()
+    config.read('keys.ini')
+    print(config['DEFAULT']['key'])
+    print(config['DEFAULT']['keyfrom'])
 
-    json = youdao.get_json(query)
-    print(json)
