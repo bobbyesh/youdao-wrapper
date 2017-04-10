@@ -134,14 +134,14 @@ class YouDaoAPI(object):
 
 
 def test():
-    words = [ '悲壮', '说了什么来着','我不知道。我应该说什么呢？']
+    words = [ '追逐']
     youdao = YouDaoAPI.from_config('keys.ini')
     jsons = []
     for w in words:
         j = youdao.get_word(w)
         jsons.append(j)
 
-    return jsons
+    print(jsons)
 
 
 
